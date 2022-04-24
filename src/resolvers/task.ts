@@ -30,16 +30,20 @@ export class TaskResolver {
     return Task.create({ title, isComplete: false }).save();
   }
 
-  @Mutation(() => Boolean)
-  deleteTask(
+  @Mutation(() => Task)
+  async deleteTask(
     @Arg("id", () => Int)
     id: number
-  ): boolean {
+  ): Promise<Task> {
+    const task = await Task.findOne({ where: { id } });
+    if (!task) {
+      throw new UserInputError(`Task with id ${id} not found`);
+    }
     try {
       Task.delete({ id });
-      return true;
+      return task;
     } catch {
-      return false;
+      throw new Error("Error deleting task");
     }
   }
 
@@ -50,7 +54,7 @@ export class TaskResolver {
 
     @Arg("isComplete", () => Boolean)
     isComplete: boolean
-  ): Promise<Task | null> {
+  ): Promise<Task> {
     const task = await Task.findOne({ where: { id } });
     if (!task) {
       throw new UserInputError(`Task with id ${id} not found`);
