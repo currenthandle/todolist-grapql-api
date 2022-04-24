@@ -41,4 +41,24 @@ export class TaskResolver {
       return false;
     }
   }
+
+  @Mutation(() => Boolean, { nullable: true })
+  updateTask(
+    @Arg("id", () => Int)
+    id: number,
+
+    @Arg("isComplete", () => Boolean)
+    isComplete: boolean
+  ): boolean | null {
+    const task = Task.findOne({ where: { id } });
+    if (!task) {
+      return null;
+    }
+    try {
+      Task.update({ id }, { isComplete });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
