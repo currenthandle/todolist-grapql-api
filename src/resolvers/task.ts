@@ -28,4 +28,17 @@ export class TaskResolver {
   ): Promise<Task> {
     return Task.create({ title, isComplete: false }).save();
   }
+
+  @Mutation(() => Boolean)
+  deleteTask(
+    @Arg("id", () => Int)
+    id: number
+  ): boolean {
+    try {
+      Task.delete({ id });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
