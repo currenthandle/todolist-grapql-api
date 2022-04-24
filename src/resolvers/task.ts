@@ -1,5 +1,6 @@
 import { Task } from "../entities/Task";
 import { Arg, Int, Mutation, Query, Resolver } from "type-graphql";
+import { UserInputError } from "apollo-server-express";
 
 @Resolver()
 export class TaskResolver {
@@ -42,23 +43,23 @@ export class TaskResolver {
     }
   }
 
-  @Mutation(() => Boolean, { nullable: true })
-  updateTask(
+  @Mutation(() => Task, { nullable: true })
+  async updateTask(
     @Arg("id", () => Int)
     id: number,
 
     @Arg("isComplete", () => Boolean)
     isComplete: boolean
-  ): boolean | null {
-    const task = Task.findOne({ where: { id } });
+  ): Promise<Task | null> {
+    const task = await Task.findOne({ where: { id } });
     if (!task) {
-      return null;
+      throw new UserInputError(`Task with id ${id} not found`);
     }
     try {
       Task.update({ id }, { isComplete });
-      return true;
+      return task;
     } catch {
-      return false;
+      throw new Error("Error updating task");
     }
   }
 }
